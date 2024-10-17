@@ -7,56 +7,57 @@ use App\Models\UserProfile;
 
 class UserProfileController extends Controller
 {
+    // List all profiles
     public function index()
     {
         $profiles = UserProfile::all();
-        return view('user_profiles.index', conpact('profiles'));
+        return view('user_profiles.index', compact('profiles'));
     }
 
-    // Display the form for creating a new user profile
+    // Display the form for creating a new profile
     public function create()
     {
         return view('user_profiles.create');
     }
 
-    // Add a new user profile
-    public function saveProfile(Request $request){
+    // Save a new user profile
+    public function saveProfile(Request $request)
+    {
         $validated = $request->validate([
             'username' => 'required|unique:user_profiles',
-            'email' => 'required|unique:user_profiles',
-            'password' => 'required',
-            //'password_confirmation' => 'required|same:password'
+            'email' => 'required|email|unique:user_profiles',
+            'password' => 'required|min:8',
         ]);
 
-        userProile::createProfile($validated);
+        UserProfile::create($validated);
 
-        return redirect('user_profiles.index')->with('success', 'User profile created successfully!');
+        return redirect()->route('user_profiles.index')->with('success', 'User profile created successfully!');
     }
 
     // Display a specific profile
-    public function displayprofile(UserProfile $userProfile)
+    public function displayProfile(UserProfile $userProfile)
     {
-        return view('user_profiles.display', conpact('userProfile'));
+        return view('user_profiles.display', compact('userProfile'));
     }
 
     // Edit a profile
-    public function editProfile(UserProfile $userProfile){
-        return view('user_profiles.edit', conpact('userProfile'));
+    public function editProfile(UserProfile $userProfile)
+    {
+        return view('user_profiles.edit', compact('userProfile'));
     }
 
     // Update a profile
-    public function updateProfile(UserProfile $userProfile, Request $request)
+    public function updateProfile(Request $request, UserProfile $userProfile)
     {
         $validated = $request->validate([
-            'username' => 'required|unique:user_profiles'. $userProfile->id,
-            'email' => 'required|unique:user_profiles'. $userProfile->id,
-            'password' => 'required',
-            //'password_confirmation' => 'required|same:password'
+            'username' => 'required|unique:user_profiles,username,' . $userProfile->id,
+            'email' => 'required|email|unique:user_profiles,email,' . $userProfile->id,
+            'password' => 'sometimes|min:8',
         ]);
 
-        $userProfile->updateProfile($validated);
+        $userProfile->update($validated);
 
-        return redirect('user_profiles.index')->with('success', 'User profile updated successfully!');
+        return redirect()->route('user_profiles.index')->with('success', 'User profile updated successfully!');
     }
 
     // Delete a profile
@@ -64,6 +65,6 @@ class UserProfileController extends Controller
     {
         $userProfile->delete();
 
-        return redirect('user_profiles.index')->with('success', 'User profile deleted successfully!');
+        return redirect()->route('user_profiles.index')->with('success', 'User profile deleted successfully!');
     }
 }
